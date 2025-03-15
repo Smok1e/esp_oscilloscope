@@ -1,0 +1,18 @@
+menu "Oscilloscope"
+    config SCREEN_PIN_MOSI
+        int "SH1106Display MOSI pin"
+        default 3
+
+    config SCREEN_PIN_SCK
+        int "SH1106Display SPI clock pin"
+        default 2
+
+    config SCREEN_PIN_DC
+        int "SH1106Display SPI data command pin"
+        default 6
+
+    config SCREEN_SPI_FREQ_MHZ
+        int "SH1106Display SPI frequency (MHz)"
+        default 3
+
+endmenu
