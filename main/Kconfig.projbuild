@@ -1,18 +1,50 @@
 menu "Oscilloscope"
-    config SCREEN_PIN_MOSI
-        int "SH1106Display MOSI pin"
+    config DISPLAY_PIN_MOSI
+        int "Display SPI MOSI pin"
         default 3
 
-    config SCREEN_PIN_SCK
-        int "SH1106Display SPI clock pin"
+    config DISPLAY_PIN_SCK
+        int "Display SPI clock pin"
         default 2
 
-    config SCREEN_PIN_DC
-        int "SH1106Display SPI data command pin"
+    config DISPLAY_PIN_DC
+        int "Display SPI data command pin"
         default 6
 
-    config SCREEN_SPI_FREQ_MHZ
-        int "SH1106Display SPI frequency (MHz)"
+    config DISPLAY_SPI_FREQ_MHZ
+        int "Display SPI clock frequency (MHz)"
         default 3
+
+    config ADC_PIN_SDA
+        int "ADC I2C SDA pin"
+        default 8
+
+    config ADC_PIN_SCL
+        int "ADC I2C SCL pin"
+        default 9
+
+    config ADC_PIN_ALERT
+        int "ADC alert pin"
+        default 4
+
+    config ADC_I2C_FREQ_KHZ
+        int "ACD I2C clock frequency (kHz)"
+        default 400
+
+    config ADC_I2C_DEVICE_ADDRESS
+        int "ADC I2c device address"
+        default 69
+
+    config ENCODER_PIN_A
+        int "Rotary encoder pin 1"
+        default 0
+
+    config ENCODER_PIN_B
+        int "Rotary encoder pin 2"
+        default 1
+
+    config ENCODER_PIN_PRESS
+        int "Rotary encoder button pin"
+        default 12
 
 endmenu

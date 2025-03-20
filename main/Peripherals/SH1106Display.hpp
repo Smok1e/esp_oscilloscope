@@ -15,22 +15,25 @@
 class SH1106Display
 {
 public:
-	SH1106Display(
-		spi_host_device_t spi_host,
-		gpio_num_t        spi_pin_dc,
-		int               spi_freq,
-		const Vector2u&   size = Vector2u(128, 64)
-	);
-	
+	SH1106Display() = default;
+	SH1106Display(const SH1106Display& copy) = delete;
 	~SH1106Display();
 	
-	void startup();
+	void setup(
+		spi_host_device_t spi_host,
+		gpio_num_t pin_dc,
+		int spi_freq,
+		const Vector2u& size = Vector2u(128, 64)
+	);
+	
 	void flush();
 	
 	Vector2u getSize() const;
 	
-	void setPixel(const Vector2i& position, bool value);
+	bool setPixel(const Vector2i& position, bool value);
+	
 	void setInverted(bool value);
+	bool isInverted() const;
 	
 	void clear(bool value = false);
 	
@@ -65,14 +68,12 @@ private:
 	static Vector2u s_max_size;
 	static size_t   s_buffer_size;
 	
-	spi_host_device_t m_spi_host;
-	gpio_num_t        m_spi_pin_dc;
-	int               m_spi_freq;
-	
+	gpio_num_t          m_pin_dc        = GPIO_NUM_NC;
 	spi_device_handle_t m_device_handle = nullptr;
-
-	Vector2u m_size;
+	Vector2u            m_size {};
+	
 	uint8_t* m_pixel_data = nullptr;
+	bool     m_inverted   = false;
 	
 	void sendCommand(uint8_t cmd);
 	void setColumnAddress(uint8_t column);
