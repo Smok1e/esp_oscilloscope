@@ -3,14 +3,10 @@
 
 //========================================
 
-const Vector2u GLYPH_SIZE(8, 16);
-
-//========================================
-
 void Rectangle(
 	SH1106Display& display,
-	const Vector2i position,
-	const Vector2i size,
+	const Vector2i& position,
+	const Vector2i& size,
 	bool value /*= true*/
 )
 {
@@ -18,6 +14,79 @@ void Rectangle(
 	for (point.x = 0; point.x < size.x; point.x++)
 		for (point.y = 0; point.y < size.y; point.y++)
 			display.setPixel(position + point, value);
+}
+
+void RoundedRectangle(
+	SH1106Display&  display,
+	const Vector2i& position,
+	const Vector2i& size,
+	int             radius,
+	bool            value /*= true*/,
+	uint8_t         style /*= RoundedRectangleStyle::Default*/
+)
+{
+	int radius_sqr = pow(radius, 2);
+	
+	Vector2i point;
+	for (point.x = 0; point.x < size.x; point.x++)
+	{
+		for (point.y = 0; point.y < size.y; point.y++)
+		{
+			int point_radius_sqr = -1;
+			
+			if (
+				style & RoundedRectangleStyle::Left &&
+				point.x <= radius
+			)
+			{
+				if (
+					style & RoundedRectangleStyle::LeftTop &&
+					point.y <= radius
+				)
+					point_radius_sqr = pow(point.x - radius, 2) + pow(point.y - radius, 2);
+				
+				else if (
+					style & RoundedRectangleStyle::LeftBottom &&
+					point.y >= size.y - radius
+				)
+					point_radius_sqr = pow(point.x - radius, 2) + pow(size.y - point.y - 1 - radius, 2);
+			}
+			
+			else if (
+				style & RoundedRectangleStyle::Right &&
+				point.x >= size.x - radius
+			)
+			{
+				if (
+					style & RoundedRectangleStyle::RightTop &&
+					point.y <= radius
+				)
+					point_radius_sqr = pow(size.x - point.x - radius - 1, 2) + pow(point.y - radius, 2);
+				
+				else if (
+					style & RoundedRectangleStyle::RightBottom &&
+					point.y >= size.y - radius
+				)
+					point_radius_sqr = pow(size.x - point.x - radius - 1, 2) + pow(size.y - point.y - 1 - radius, 2);
+			}
+
+			if (point_radius_sqr < 0)
+				display.setPixel(
+					position + point,
+					style & RoundedRectangleStyle::Outline
+						? value ^ (point.x == 0 || point.x == size.x - 1 || point.y == 0 || point.y == size.y - 1)
+						: value
+				);
+			
+			else if (point_radius_sqr <= radius_sqr)
+				display.setPixel(
+					position + point,
+					style & RoundedRectangleStyle::Outline
+						? value ^ (radius_sqr - point_radius_sqr <= radius)
+						: value
+				);
+		}
+	}
 }
 
 void Circle(
@@ -85,56 +154,43 @@ void Line(
 
 void Character(
 	SH1106Display& display,
+	const Font& font,
 	const Vector2i& position,
 	char ch,
-	bool value /*= true*/
+	bool value /*= true */,
+	bool fill  /*= false*/
 )
 {
-	const auto* glyph = GetGlyph(ch);
-	if (!glyph)
-		return;
-
-	Vector2i point;
-	for (point.y = 0; point.y < GLYPH_SIZE.y; point.y++)
-		for (point.x = 0; point.x < 8; point.x++)
-			if ((glyph[point.y] >> (7 - point.x)) & 1)
-				display.setPixel(position + point, value);
+	if (const auto* data = font[ch])
+	{
+		Vector2i point;
+		for (point.y = 0; point.y < font.getGlyphSize().y; point.y++)
+		{
+			for (point.x = 0; point.x < font.getGlyphSize().x; point.x++)
+			{
+				uint16_t i = point.y * font.getGlyphSize().x + point.x;
+				
+				if ((data[i / 8] >> (i % 8)) & 1)
+					display.setPixel(position + point, value);
+				
+				else if (fill)
+					display.setPixel(position + point, !value);
+			}
+		}
+	}
 }
 
 void Text(
 	SH1106Display& display,
+	const Font& font,
 	const Vector2i& position,
 	std::string_view text,
 	bool value /*= true*/,
 	bool fill  /*= false*/
 )
 {
-	if (fill)
-		Rectangle(display, position, TextSize(text), !value);
-	
 	for (size_t i = 0; i < text.length(); i++)
-		Character(display, position + i * Vector2i(GLYPH_SIZE.x, 0), text[i], value);
-}
-
-Vector2u TextSize(std::string_view text)
-{
-	return GLYPH_SIZE * Vector2u(text.length(), 1);
-}
-
-//========================================
-
-extern const uint8_t FONT_DATA[] asm("_binary_font_bin_start");
-
-const uint8_t* GetGlyph(char ch)
-{
-	constexpr size_t glyph_size_bytes = 16;
-	
-	char begin = FONT_DATA[0];
-	char end   = FONT_DATA[1];
-	
-	return begin <= ch && ch <= end
-		? FONT_DATA + 2 + glyph_size_bytes * (ch - begin)
-		: nullptr;
+		Character(display, font, position + i * Vector2i(font.getGlyphSize().x, 0), text[i], value, fill);
 }
 
 //========================================

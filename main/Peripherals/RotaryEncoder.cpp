@@ -1,6 +1,5 @@
 #include "esp_log.h"
-
-#include <cstring>
+#include "esp_timer.h"
 
 #include <Peripherals/RotaryEncoder.hpp>
 
@@ -32,6 +31,10 @@ void RotaryEncoder::setup(
 	m_pin_a = pin_a;
 	m_pin_b = pin_b;
 	m_pin_press = pin_press;
+	
+	m_last_state.a = true;
+	m_last_state.b = true;
+	m_last_state.press = true;
 	
 	gpio_config_t config = {};
 	config.pin_bit_mask = 1 << pin_a | 1 << pin_b | 1 << pin_press;
@@ -104,11 +107,19 @@ void RotaryEncoder::InterruptHandler(void* arg)
 	}
 	
 	if (state.press != instance.m_last_state.press)
-		instance.enqueueEvent(
-			(instance.m_press = !state.press)
-				? Event::ButtonPressed
-				: Event::ButtonReleased
-		);
+	{
+		auto current_time = esp_timer_get_time();
+		if (current_time - instance.m_last_button_event_time > 10000 /* 10ms */)
+		{
+			Event event = {};
+			event.type = Event::Button;
+			event.button = !state.press;
+			
+			instance.enqueueEvent(event);
+		}
+		
+		instance.m_last_button_event_time = current_time;
+	}
 	
 	instance.m_last_state = state;
 }
@@ -121,20 +132,15 @@ void RotaryEncoder::enqueueEvent(Event event)
 void RotaryEncoder::updateCounter(int8_t direction)
 {
 	constexpr int8_t rotation_period = 4;
-	if (abs(m_counter += direction) >= rotation_period)
+	
+	uint8_t abs_counter = abs(m_counter += direction);
+	if (abs_counter >= rotation_period)
 	{
-		if (m_counter > 0)
-		{
-			enqueueEvent(Event::ValueIncremented);
-			m_value++;
-		}
+		Event event = {};
+		event.type = Event::Rotation;
+		event.delta = m_counter / abs_counter;
 		
-		else
-		{
-			enqueueEvent(Event::ValueDecremented);
-			m_value--;
-		}
-		
+		enqueueEvent(event);
 		m_counter = 0;
 	}
 }

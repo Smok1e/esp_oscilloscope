@@ -69,7 +69,7 @@ void SH1106Display::flush()
 	}
 }
 
-Vector2u SH1106Display::getSize() const
+const Vector2u& SH1106Display::getSize() const
 {
 	return m_size;
 }
@@ -86,6 +86,17 @@ bool SH1106Display::setPixel(const Vector2i& position, bool value)
 	
 	(m_pixel_data[byte] &= ~(1 << bit)) |= (value << bit);
 	return true;
+}
+
+void SH1106Display::setContrast(uint8_t contrast)
+{
+	sendCommand(Command::SetContrastControlMode);
+	sendCommand(Command::SetContrast | (m_contrast = contrast));
+}
+
+uint8_t SH1106Display::getContrast() const
+{
+	return m_contrast;
 }
 
 void SH1106Display::setInverted(bool value)

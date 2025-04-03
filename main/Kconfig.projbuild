@@ -1,27 +1,27 @@
 menu "Oscilloscope"
     config DISPLAY_PIN_MOSI
         int "Display SPI MOSI pin"
-        default 3
+        default 23
 
     config DISPLAY_PIN_SCK
         int "Display SPI clock pin"
-        default 2
+        default 18
 
     config DISPLAY_PIN_DC
         int "Display SPI data command pin"
-        default 6
+        default 5
 
     config DISPLAY_SPI_FREQ_MHZ
         int "Display SPI clock frequency (MHz)"
-        default 3
+        default 20
 
     config ADC_PIN_SDA
         int "ADC I2C SDA pin"
-        default 8
+        default 21
 
     config ADC_PIN_SCL
         int "ADC I2C SCL pin"
-        default 9
+        default 22
 
     config ADC_PIN_ALERT
         int "ADC alert pin"
@@ -37,14 +37,14 @@ menu "Oscilloscope"
 
     config ENCODER_PIN_A
         int "Rotary encoder pin 1"
-        default 0
+        default 17
 
     config ENCODER_PIN_B
         int "Rotary encoder pin 2"
-        default 1
+        default 16
 
     config ENCODER_PIN_PRESS
         int "Rotary encoder button pin"
-        default 12
+        default 15
 
 endmenu

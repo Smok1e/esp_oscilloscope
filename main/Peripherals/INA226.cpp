@@ -37,7 +37,7 @@ void INA226::reset()
 
 INA226::MeasurementType INA226::readShuntVoltage()
 {
-	return static_cast<int16_t>(readRegister(Register::ShuntVoltage)) * static_cast<MeasurementType>(.000025);
+	return static_cast<int16_t>(readRegister(Register::ShuntVoltage)) * static_cast<MeasurementType>(.0025);
 }
 
 INA226::MeasurementType INA226::readBusVoltage()

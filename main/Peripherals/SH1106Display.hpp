@@ -28,9 +28,12 @@ public:
 	
 	void flush();
 	
-	Vector2u getSize() const;
+	const Vector2u& getSize() const;
 	
 	bool setPixel(const Vector2i& position, bool value);
+	
+	void setContrast(uint8_t contrast);
+	uint8_t getContrast() const;
 	
 	void setInverted(bool value);
 	bool isInverted() const;
@@ -45,6 +48,7 @@ private:
 		SetPumpVoltageValue                    = 0b00110000, // 2 lower bits interpreted as pump voltage value
 		SetDisplayStartLine                    = 0b01000000, // 6 lower bits interpreted as line address
 		SetContrastControlMode                 = 0b10000001, // the following byte will be treated as contrast value
+		SetContrast                            = 0b01000000, // 6 lower bits are interpreted as contrast value
 		SetSegmentRemap                        = 0b10100000, // lower bit sets right (0) or left (1) rotation
 		SetEntireDisplayOn                     = 0b10100100, // lower bit selects normal display (0) or entire display ON (1)
 		SetReverseMode                         = 0b10100110, // lower bit sets normal indication (0) or reverse (1)
@@ -73,7 +77,9 @@ private:
 	Vector2u            m_size {};
 	
 	uint8_t* m_pixel_data = nullptr;
-	bool     m_inverted   = false;
+	
+	bool    m_inverted = false;
+	uint8_t m_contrast = 0x3F;
 	
 	void sendCommand(uint8_t cmd);
 	void setColumnAddress(uint8_t column);
